@@ -4,18 +4,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/habit_form/habit_form_screen.dart';
 import '../../features/habit_detail/habit_detail_screen.dart';
+import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/premium/premium_screen.dart';
+import '../../features/stats/stats_screen.dart';
+import '../../features/themes/themes_screen.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/premium_provider.dart';
 import '../constants/app_constants.dart';
+import '../hive/hive_service.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     debugLogDiagnostics: false,
     redirect: (context, state) {
+      // First launch: redirect to onboarding if no name set
+      final path = state.uri.path;
+      if (path != '/onboarding' && HiveService.userName == null) {
+        return '/onboarding';
+      }
       // Guard: free users can only have 3 habits
-      if (state.uri.path == '/habit/new') {
+      if (path == '/habit/new') {
         final count = ref.read(habitProvider).length;
         final isPremium = ref.read(premiumProvider);
         if (count >= AppConstants.kFreeHabitLimit && !isPremium) {
@@ -25,6 +34,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/onboarding',
+        name: 'onboarding',
+        pageBuilder: (context, state) => _slideTransition(
+          state,
+          const OnboardingScreen(),
+        ),
+      ),
       GoRoute(
         path: '/',
         name: 'home',
@@ -63,6 +80,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _modalTransition(
           state,
           const PremiumScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/stats',
+        name: 'stats',
+        pageBuilder: (context, state) => _slideTransition(
+          state,
+          const StatsScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/themes',
+        name: 'themes',
+        pageBuilder: (context, state) => _slideTransition(
+          state,
+          const ThemesScreen(),
         ),
       ),
     ],

@@ -10,6 +10,7 @@ class HiveService {
     Hive.registerAdapter(HabitAdapter());
     await Hive.openBox<Habit>(AppConstants.kHiveHabitsBox);
     await Hive.openBox<bool>(AppConstants.kHivePremiumBox);
+    await Hive.openBox<String>(AppConstants.kHiveSettingsBox);
   }
 
   static Box<Habit> get habitsBox =>
@@ -17,4 +18,13 @@ class HiveService {
 
   static Box<bool> get premiumBox =>
       Hive.box<bool>(AppConstants.kHivePremiumBox);
+
+  static Box<String> get settingsBox =>
+      Hive.box<String>(AppConstants.kHiveSettingsBox);
+
+  static String? get userName =>
+      settingsBox.get(AppConstants.kUserNameKey);
+
+  static Future<void> setUserName(String name) =>
+      settingsBox.put(AppConstants.kUserNameKey, name);
 }

@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
@@ -27,58 +29,37 @@ class HabitDetailScreen extends ConsumerWidget {
     }
 
     final habitColor = Color(habit.colorValue);
-    final isDoneToday =
-        StreakService.isCompletedToday(habit.completionDates);
+    final isDoneToday = StreakService.isCompletedToday(habit.completionDates);
 
     return Scaffold(
       backgroundColor: AppColors.kBackground,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 160,
+            expandedHeight: 220,
             pinned: true,
             backgroundColor: AppColors.kBackground,
+            surfaceTintColor: Colors.transparent,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      habitColor.withAlpha(179),
-                      AppColors.kBackground,
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-              ),
-              titlePadding: const EdgeInsets.only(left: 60, bottom: 14),
-              title: Row(
-                children: [
-                  Text(
-                    habit.icon,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      habit.name,
-                      style: AppTextStyles.heading3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
+              collapseMode: CollapseMode.parallax,
+              background: _HeroBackground(
+                habitColor: habitColor,
+                icon: habit.icon,
+                name: habit.name,
+                streak: habit.streakCount,
+                isDone: isDoneToday,
               ),
             ),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
-              onPressed: () => context.pop(),
+            leading: _GlassButton(
+              icon: Icons.arrow_back_rounded,
+              onTap: () => context.pop(),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.edit_rounded),
-                onPressed: () => context.push('/habit/$habitId/edit'),
-                tooltip: 'Edit',
+              _GlassButton(
+                icon: Icons.edit_rounded,
+                onTap: () => context.push('/habit/$habitId/edit'),
               ),
+              const SizedBox(width: 8),
             ],
           ),
           SliverToBoxAdapter(
@@ -90,6 +71,7 @@ class HabitDetailScreen extends ConsumerWidget {
                   StreakBanner(
                     currentStreak: habit.streakCount,
                     bestStreak: habit.bestStreak,
+                    habitColor: habitColor,
                   ),
                   const SizedBox(height: 16),
                   CompletionStatsRow(habit: habit),
@@ -107,12 +89,179 @@ class HabitDetailScreen extends ConsumerWidget {
       ),
       floatingActionButton: isDoneToday
           ? _DoneButton(habitColor: habitColor)
+              .animate()
+              .scale(begin: const Offset(0.8, 0.8), duration: 300.ms, curve: Curves.easeOutBack)
+              .fadeIn()
           : _MarkDoneButton(
               habitColor: habitColor,
-              onPressed: () => ref
-                  .read(habitProvider.notifier)
-                  .toggleCompletion(habitId),
+              onPressed: () =>
+                  ref.read(habitProvider.notifier).toggleCompletion(habitId),
+            )
+              .animate(delay: 100.ms)
+              .slideY(begin: 0.5, duration: 350.ms, curve: Curves.easeOutCubic)
+              .fadeIn(),
+    );
+  }
+}
+
+class _HeroBackground extends StatelessWidget {
+  final Color habitColor;
+  final String icon;
+  final String name;
+  final int streak;
+  final bool isDone;
+
+  const _HeroBackground({
+    required this.habitColor,
+    required this.icon,
+    required this.name,
+    required this.streak,
+    required this.isDone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Gradient from habit color
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                habitColor.withAlpha(200),
+                habitColor.withAlpha(60),
+                AppColors.kBackground,
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: const [0.0, 0.5, 1.0],
             ),
+          ),
+        ),
+        // Noise texture overlay via radial glow
+        Positioned(
+          top: -60,
+          right: -40,
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.white.withAlpha(20),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Centered content (visible when expanded)
+        Positioned(
+          bottom: 40,
+          left: 0,
+          right: 0,
+          child: Column(
+            children: [
+              // Large emoji in glowing circle
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withAlpha(30),
+                  border: Border.all(
+                    color: Colors.white.withAlpha(60),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: habitColor.withAlpha(100),
+                      blurRadius: 24,
+                      spreadRadius: 4,
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    icon,
+                    style: const TextStyle(fontSize: 36),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                name,
+                style: AppTextStyles.heading2.copyWith(
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withAlpha(80),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+              ),
+              if (streak > 0) ...[
+                const SizedBox(height: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(25),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withAlpha(50)),
+                  ),
+                  child: Text(
+                    isDone
+                        ? '🔥 $streak day streak · Done today!'
+                        : '🔥 $streak day streak',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GlassButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _GlassButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(6),
+      child: GestureDetector(
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(30),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withAlpha(50)),
+              ),
+              child: Icon(icon, color: Colors.white, size: 18),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -134,12 +283,16 @@ class _MarkDoneButton extends StatelessWidget {
         height: 58,
         padding: const EdgeInsets.symmetric(horizontal: 28),
         decoration: BoxDecoration(
-          color: habitColor,
+          gradient: LinearGradient(
+            colors: [habitColor, habitColor.withAlpha(200)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: habitColor.withAlpha(100),
-              blurRadius: 20,
+              color: habitColor.withAlpha(120),
+              blurRadius: 24,
               offset: const Offset(0, 8),
             ),
           ],
@@ -175,20 +328,32 @@ class _DoneButton extends StatelessWidget {
       height: 58,
       padding: const EdgeInsets.symmetric(horizontal: 28),
       decoration: BoxDecoration(
-        color: AppColors.kAccentGreen.withAlpha(26),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.kAccentGreen,
+            const Color(0xFF34D399),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: AppColors.kAccentGreen, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.kAccentGreen.withAlpha(100),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.check_circle_rounded,
-              color: AppColors.kAccentGreen, size: 22),
+          Icon(Icons.check_circle_rounded, color: Colors.white, size: 22),
           SizedBox(width: 8),
           Text(
             'Done Today! 🎉',
             style: TextStyle(
-              color: AppColors.kAccentGreen,
+              color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),

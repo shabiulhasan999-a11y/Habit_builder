@@ -23,15 +23,30 @@ class _TimePickerTileState extends State<TimePickerTile> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialTime != null) {
+    _applyInitialTime(widget.initialTime);
+  }
+
+  @override
+  void didUpdateWidget(TimePickerTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialTime != oldWidget.initialTime) {
+      setState(() => _applyInitialTime(widget.initialTime));
+    }
+  }
+
+  void _applyInitialTime(String? time) {
+    if (time != null) {
       _enabled = true;
-      final parts = widget.initialTime!.split(':');
+      final parts = time.split(':');
       if (parts.length == 2) {
         _time = TimeOfDay(
           hour: int.tryParse(parts[0]) ?? 8,
           minute: int.tryParse(parts[1]) ?? 0,
         );
       }
+    } else {
+      _enabled = false;
+      _time = null;
     }
   }
 

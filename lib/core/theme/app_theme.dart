@@ -6,14 +6,24 @@ import '../constants/app_text_styles.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get dark {
+  static ThemeData get dark => buildTheme(
+        AppColors.kAccentPrimary,
+        AppColors.kAccentSecondary,
+        AppColors.kBackground,
+      );
+
+  static ThemeData buildTheme(
+    Color primary,
+    Color secondary,
+    Color background,
+  ) {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.kBackground,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.kAccentPrimary,
-        secondary: AppColors.kAccentSecondary,
+      scaffoldBackgroundColor: background,
+      colorScheme: ColorScheme.dark(
+        primary: primary,
+        secondary: secondary,
         surface: AppColors.kSurface,
         error: AppColors.kAccentRed,
         onPrimary: Colors.white,
@@ -53,8 +63,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide:
-              const BorderSide(color: AppColors.kAccentPrimary, width: 1.5),
+          borderSide: BorderSide(color: primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -76,7 +85,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.kAccentPrimary,
+          backgroundColor: primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
@@ -92,7 +101,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.kAccentPrimary,
+          foregroundColor: primary,
           textStyle: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
@@ -125,14 +134,12 @@ class AppTheme {
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return AppColors.kAccentPrimary;
-          }
+          if (states.contains(WidgetState.selected)) return primary;
           return AppColors.kTextDisabled;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.kAccentPrimary.withAlpha(77);
+            return primary.withAlpha(77);
           }
           return AppColors.kGlassWhite;
         }),

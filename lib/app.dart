@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/habit_provider.dart';
+import 'providers/theme_provider.dart';
 
 class HabitApp extends ConsumerStatefulWidget {
   const HabitApp({super.key});
@@ -24,9 +25,14 @@ class _HabitAppState extends ConsumerState<HabitApp> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
+    final themeColors = ref.watch(themeColorsProvider);
     return MaterialApp.router(
       title: 'Habit Builder',
-      theme: AppTheme.dark,
+      theme: AppTheme.buildTheme(
+        themeColors.primary,
+        themeColors.secondary,
+        themeColors.background,
+      ),
       routerConfig: router,
       debugShowCheckedModeBanner: false,
     );

@@ -3,7 +3,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../services/streak_service.dart';
 
-class HeatmapCalendar extends StatelessWidget {
+class HeatmapCalendar extends StatefulWidget {
   final List<String> completionDates;
   final Color habitColor;
 
@@ -14,8 +14,31 @@ class HeatmapCalendar extends StatelessWidget {
   });
 
   @override
+  State<HeatmapCalendar> createState() => _HeatmapCalendarState();
+}
+
+class _HeatmapCalendarState extends State<HeatmapCalendar> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final completionSet = completionDates.toSet();
+    final completionSet = widget.completionDates.toSet();
     final today = DateTime.now();
     // Align to the Monday of the current week then go back 51 more weeks = 52 weeks total
     final todayWeekday = today.weekday; // 1=Mon, 7=Sun
@@ -42,6 +65,7 @@ class HeatmapCalendar extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         SingleChildScrollView(
+          controller: _scrollController,
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
@@ -66,7 +90,7 @@ class HeatmapCalendar extends StatelessWidget {
                     startDate: startDate,
                     today: today,
                     completionSet: completionSet,
-                    habitColor: habitColor,
+                    habitColor: widget.habitColor,
                     cellSize: cellSize,
                     cellGap: cellGap,
                     weeks: weeks,
@@ -75,7 +99,7 @@ class HeatmapCalendar extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               // Legend
-              _Legend(habitColor: habitColor),
+              _Legend(habitColor: widget.habitColor),
             ],
           ),
         ),

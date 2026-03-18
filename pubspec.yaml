@@ -34,6 +34,9 @@ dependencies:
   # Animations
   flutter_animate: ^4.5.2
 
+  # Share / Export
+  share_plus: ^10.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

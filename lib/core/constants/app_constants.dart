@@ -5,6 +5,8 @@ class AppConstants {
   static const String kHiveHabitsBox = 'habits';
   static const String kHivePremiumBox = 'premium';
   static const String kPremiumKey = 'isPremium';
+  static const String kHiveSettingsBox = 'settings';
+  static const String kUserNameKey = 'userName';
   static const String kNotificationChannelId = 'habit_reminders';
   static const String kNotificationChannelName = 'Habit Reminders';
   static const String kNotificationChannelDesc =

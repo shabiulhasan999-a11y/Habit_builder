@@ -33,19 +33,16 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
   void initState() {
     super.initState();
     if (_isEditing) {
-      // Prefill from existing habit
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final habit = ref.read(habitByIdProvider(widget.habitId!));
-        if (habit != null) {
-          _editingHabit = habit;
-          _nameController.text = habit.name;
-          setState(() {
-            _selectedColor = habit.colorValue;
-            _selectedEmoji = habit.icon;
-            _reminderTime = habit.reminderTime;
-          });
-        }
-      });
+      // Read directly in initState so TimePickerTile sees the correct
+      // initialTime on its very first build (no addPostFrameCallback race).
+      final habit = ref.read(habitByIdProvider(widget.habitId!));
+      if (habit != null) {
+        _editingHabit = habit;
+        _nameController.text = habit.name;
+        _selectedColor = habit.colorValue;
+        _selectedEmoji = habit.icon;
+        _reminderTime = habit.reminderTime;
+      }
     }
   }
 
