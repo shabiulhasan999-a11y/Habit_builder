@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "iOS Simulator",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "apple_ios_simulator"],
+      "port": 9100
+    },
+    {
+      "name": "Android Emulator (Pixel 7a)",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "Pixel_7a"],
+      "port": 9101
+    },
+    {
+      "name": "macOS Desktop",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "macos"],
+      "port": 9102
+    },
+    {
+      "name": "Web (Chrome)",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "chrome", "--web-port", "8080"],
+      "port": 8080
+    }
+  ]
+}
